@@ -7,8 +7,8 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: cluster-1    # Add your cluster name here.
-  GKE_ZONE: us-central1-c   # Add your cluster zone here.
+  GKE_CLUSTER: frank-cluster-1    # Add your cluster name here.
+  GKE_ZONE: us-central1   # Add your cluster zone here.
   DEPLOYMENT_NAME: frank-api # Add your deployment name here.
   IMAGE: frank-api
 
@@ -49,19 +49,15 @@ jobs:
         credentials: ${{ secrets.GKE_SA_KEY }}
         project_id: ${{ secrets.GKE_PROJECT }}
 
-    # Build the Docker image
-    - name: Build
+    # Tag the existing image with the GAR repository path
+    - name: Tag image
       run: |-
-        docker build \
-          --tag "us-docker.pkg.dev/my-devops-team/frank-api/api-tests:latest" \
-          --build-arg GITHUB_SHA="$GITHUB_SHA" \
-          --build-arg GITHUB_REF="$GITHUB_REF" \
-          .
+        docker tag gcr.io/cit262-416322/api-test:latest us-central1-docker.pkg.dev/cit262-416322/frank-api/api-test:latest
 
-    # Push the Docker image to Google Container Registry
-    - name: Publish
+    # Push the tagged image to GAR
+    - name: Push image
       run: |-
-        docker push "us-docker.pkg.dev/my-devops-team/frank-api/api-tests:latest"
+        docker push us-central1-docker.pkg.dev/cit262-416322/frank-api/api-test:latest
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
